@@ -1,25 +1,74 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+import { Layout, Button, List } from 'antd'
+import { DownloadOutlined } from '@ant-design/icons'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const config = {
+  apiUrl: 'https://type.fit/api/quotes',
+  repoUrl: 'https://github.com/ssokurenko/quotes-react-app',
+  developer__name: 'Sadman Sakib',
+  github: 'https://github.com/Sadman-Sakib2234'
 }
 
-export default App;
+const { Header, Content } = Layout
+
+function App() {
+  const [quotes, setQuotes] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const Quote = ({ text, author }) => {
+    return (
+      <span>
+        <strong>{text}</strong> - <span>{author}</span>
+      </span>
+    )
+  }
+  const getQuotes = () => {
+    setQuotes([])
+    setIsLoading(true)
+    fetch(config.apiUrl)
+      .then(function (response) {
+        return response.json()
+      })
+      .then((data) => {
+        setQuotes(data)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setIsLoading(false)
+      })
+  }
+  return (
+    <Layout>
+      <Header>
+        <div className="container">
+          <span className="site-logo">Motivational Quotes</span>
+        </div>
+      </Header>
+      <Content className="container">
+        <List
+          size="small"
+          loading={isLoading}
+          header={
+            <Button
+              onClick={() => getQuotes()}
+              type="primary"
+              icon={<DownloadOutlined />}
+              disabled={isLoading}
+              size="large">
+              Show Quotes
+            </Button>
+          }
+          footer={<a href={config.github}>Developer - {config.developer__name}</a>}
+          bordered
+          dataSource={quotes}
+          renderItem={(quote) => (
+            <List.Item>
+              <Quote text={quote.text} author={quote.author} />
+            </List.Item>
+          )}
+        />
+      </Content>
+    </Layout>
+  )
+}
+
+export default App
